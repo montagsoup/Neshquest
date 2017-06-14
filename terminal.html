@@ -1,8 +1,15 @@
+<!DOCTYPE html>
 <html>
 <head>
 	<title>Neshquest</title>
 
+	<meta charset="utf-8"/>
+
 	<style>
+		html, body {
+			height: 100%;
+		}
+
 		body {
 			background-color: Black;
 		}
@@ -54,16 +61,14 @@
 
 							document.getElementById("screen").innerHTML = response.screen;
 
-							document.getElementById("console_text").innerHTML += response.console.text;
+							document.getElementById("console_text").value += response.console_text;
 						}
 					}
 				};
 
-				xhttp.open("POST", "update", true);
+				xhttp.open("POST", "/update", true);
 				xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 				xhttp.send(input);
-
-				document.getElementById("console_text").innerHTML += "hello\n";
 			})();
 		};
 	</script>
