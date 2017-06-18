@@ -24,13 +24,14 @@
 			height: 100%;
 
 			flex: 0 0 30ch;
+			max-width: 30ch;
 
 			font-size: 4.5vh;
 			font-family: monospace;
 			line-height: 1em;
 
 			white-space: pre-wrap;
-			word-wrap: break-word;
+			word-break: break-all;
 
 			color: White;
 		}
@@ -72,52 +73,58 @@
 
 	<script>
 		window.onload = function() {
-			var input;
+			var input = {};
+			var connected = true;
 
 			document.addEventListener('keydown', function(e) {
-				if(e.keyCode == 37) {
-					input.left = true;
-				}
-
-				if(e.keyCode == 38) {
-					input.up = true;
-				}
-
-				if(e.keyCode == 39) {
-					input.right = true;
-				}
-
-				if(e.keyCode == 40) {
-					input.down = true;
-				}
+				input.key = e.key;
 			});
+
+			function printToConsole(print) {
+				var console_text = document.getElementById("console_text");
+
+				console_text.innerHTML += print;
+
+				console_text.scrollTop = console_text.scrollHeight;
+			}
 
 			(function update () {
 				var xhttp = new XMLHttpRequest();
 
 				xhttp.onreadystatechange = function() {
 					if(this.readyState == 4) {
-						setTimeout(update, 250);
+						setTimeout(update, 100);
 
 						if(this.status == 200) {
+							if(!connected) {
+								printToConsole("Reconnected.\n\n");
+							}
+
+							connected = true;
+
 							var response = JSON.parse(this.responseText);
 
 							document.getElementById("screen").innerHTML = response.screen;
 
-							if(response.console_text != '') {
-								var console_text = document.getElementById("console_text");
+							printToConsole(response.console_text);
 
-								console_text.innerHTML += response.console_text;
-
-								console_text.scrollTop = console_text.scrollHeight;
+							if(input.token == null && response.token != null) {
+								input.token = response.token;
 							}
+						} else {
+							if(connected) {
+								printToConsole("\n\nDisconnected.\n");
+							}
+
+							connected = false;
 						}
 					}
 				};
 
 				xhttp.open("POST", "/update", true);
-				xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-				xhttp.send(input);
+				xhttp.setRequestHeader("Content-type", "text/json");
+				xhttp.send(JSON.stringify(input));
+				input.key = null;
 			})();
 		};
 	</script>
@@ -128,7 +135,6 @@
 		<pre id="screen"></pre>
 		<div id="console">
 			<div id="console_text"></div>
-			<input type="text" id="console_input">
 		</div>
 	</div>
 </body>
