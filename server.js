@@ -3,6 +3,9 @@ var fs = require('fs');
 var qs = require('querystring');
 var crypto = require('crypto');
 
+var database = require('./database');
+var passwords = require('./passwords');
+
 http.createServer(function(req, res) {
 	if(req.url == '/') {
 		fs.readFile('terminal.html', function(err, data) {
@@ -85,7 +88,7 @@ function Session(token) {
 
 					printToScreen(out, 'Password:', 4, 10);
 					if(this.login.stage == 2) {
-						printToScreen(out, this.login.buffer, 14, 10);
+						printToScreen(out, Array(this.login.buffer.length + 1).join('*'), 14, 10);
 					}
 
 					if(input.key == null) {
@@ -108,11 +111,20 @@ function Session(token) {
 					break;
 
 				case 3:
-					if(checkPassword(this.login.username, this.login.password)) {
+					if(passwords.check(this.login.username, this.login.password)) {
+						console.log('correct');
 						this.login.stage++;
 					} else {
-						printToConsole("Wrong password.\n");
+						printToConsole(out, "Wrong password.\n");
+
+						this.login.username = '';
+						this.login.password = '';
+
+						this.login.stage = 1;
 					}
+					break;
+
+				case 4:
 					break;
 			}
 		}
@@ -173,9 +185,5 @@ function update(input)
 }
 
 function generateToken() {
-	return crypto.randomBytes(256).toString('hex');
-}
-
-function checkPassword(username, password) {
-	return false;
+	return crypto.randomBytes(32).toString('hex');
 }
