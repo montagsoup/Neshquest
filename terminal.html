@@ -78,6 +78,7 @@
 
 			document.addEventListener('keydown', function(e) {
 				input.key = e.key;
+				e.preventDefault();
 			});
 
 			function printToConsole(print) {
@@ -88,12 +89,28 @@
 				console_text.scrollTop = console_text.scrollHeight;
 			}
 
+			function printToScreen(print) {
+				var screen = document.getElementById("screen");
+
+				var text = '';
+
+				for(var i = 0; i < print.length; i++) {
+					text += print.charAt(i);
+
+					if(i % 30 == 29) {
+						text += '\n';
+					}
+				}
+
+				screen.innerHTML = text;
+			}
+
 			(function update () {
 				var xhttp = new XMLHttpRequest();
 
 				xhttp.onreadystatechange = function() {
 					if(this.readyState == 4) {
-						setTimeout(update, 100);
+						setTimeout(update, 50);
 
 						if(this.status == 200) {
 							if(!connected) {
@@ -104,7 +121,7 @@
 
 							var response = JSON.parse(this.responseText);
 
-							document.getElementById("screen").innerHTML = response.screen;
+							printToScreen(response.screen);
 
 							printToConsole(response.console_text);
 
